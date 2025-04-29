@@ -4,12 +4,16 @@ import {
   Menu, 
   Search, 
   Bell, 
-  X 
+  X,
+  PenSquare,
+  LogIn,
+  UserPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useDarkMode } from "@/hooks/useDarkMode";
+import { useAuth } from "@/hooks/use-auth";
 
 interface NavLinkProps {
   href: string;
