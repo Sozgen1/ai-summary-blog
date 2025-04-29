@@ -40,13 +40,7 @@ const Header: React.FC = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Mock user data (in a real app, this would come from auth context)
-  const user = {
-    id: 1,
-    name: "John Doe",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-  };
+  const { user, logoutMutation } = useAuth();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +67,7 @@ const Header: React.FC = () => {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <NavLink href="/" label="Home" isActive={location === "/"} />
               <NavLink href="/explore" label="Explore" isActive={location === "/explore"} />
-              <NavLink href="/bookmarks" label="Bookmarks" isActive={location === "/bookmarks"} />
+              {user && <NavLink href="/bookmarks" label="Bookmarks" isActive={location === "/bookmarks"} />}
             </div>
           </div>
 
@@ -93,23 +87,63 @@ const Header: React.FC = () => {
               <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">Dark</span>
             </div>
 
-            {/* Notifications */}
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-              <span className="sr-only">View notifications</span>
-              <Bell className="h-6 w-6" />
-            </Button>
+            {user ? (
+              <>
+                {/* Create Blog Button */}
+                <Link href="/editor">
+                  <Button variant="ghost" size="sm" className="mr-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                    <PenSquare className="h-5 w-5 mr-1" />
+                    <span>Create</span>
+                  </Button>
+                </Link>
+                
+                {/* Notifications */}
+                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                  <span className="sr-only">View notifications</span>
+                  <Bell className="h-6 w-6" />
+                </Button>
 
-            {/* User Profile */}
-            <div className="ml-3 relative">
-              <Link href={`/profile/${user.id}`}>
-                <div className="cursor-pointer">
-                  <Avatar>
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
-                  </Avatar>
+                {/* User Profile */}
+                <div className="ml-3 relative">
+                  <Link href={`/profile/${user.id}`}>
+                    <div className="cursor-pointer">
+                      <Avatar>
+                        <AvatarImage src={user.profileImage || undefined} alt={user.name || user.username} />
+                        <AvatarFallback>{(user.name || user.username).substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                    </div>
+                  </Link>
                 </div>
-              </Link>
-            </div>
+                
+                {/* Sign Out Button */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="ml-2"
+                  onClick={() => logoutMutation.mutate()}
+                >
+                  Sign out
+                </Button>
+              </>
+            ) : (
+              <>
+                {/* Sign In Button */}
+                <Link href="/auth">
+                  <Button variant="ghost" size="sm" className="mr-2">
+                    <LogIn className="h-5 w-5 mr-1" />
+                    <span>Sign in</span>
+                  </Button>
+                </Link>
+                
+                {/* Sign Up Button */}
+                <Link href="/auth?tab=register">
+                  <Button className="bg-primary-500 hover:bg-primary-600 text-white">
+                    <UserPlus className="h-5 w-5 mr-1" />
+                    <span>Sign up</span>
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -145,41 +179,61 @@ const Header: React.FC = () => {
                 Explore
               </div>
             </Link>
-            <Link href="/bookmarks">
-              <div className="px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
-                Bookmarks
-              </div>
-            </Link>
+            {user && (
+              <Link href="/bookmarks">
+                <div className="px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+                  Bookmarks
+                </div>
+              </Link>
+            )}
           </div>
 
-          <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center px-4">
-              <div className="flex-shrink-0">
-                <Avatar>
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
-                </Avatar>
+          {user ? (
+            <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center px-4">
+                <div className="flex-shrink-0">
+                  <Avatar>
+                    <AvatarImage src={user.profileImage || undefined} alt={user.name || user.username} />
+                    <AvatarFallback>{(user.name || user.username).substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="ml-3">
+                  <div className="text-base font-medium text-gray-800 dark:text-white">{user.name || user.username}</div>
+                </div>
               </div>
-              <div className="ml-3">
-                <div className="text-base font-medium text-gray-800 dark:text-white">{user.name}</div>
+              <div className="mt-3 flex flex-col space-y-1">
+                <Link href={`/profile/${user.id}`}>
+                  <div className="px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer">
+                    Your Profile
+                  </div>
+                </Link>
+                <Link href="/editor">
+                  <div className="px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer">
+                    Create Blog
+                  </div>
+                </Link>
+                <button 
+                  className="text-left px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                  onClick={() => logoutMutation.mutate()}
+                >
+                  Sign out
+                </button>
               </div>
             </div>
-            <div className="mt-3 flex flex-col space-y-1">
-              <Link href={`/profile/${user.id}`}>
-                <div className="px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer">
-                  Your Profile
+          ) : (
+            <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700 flex flex-col space-y-3">
+              <Link href="/auth">
+                <div className="w-full text-center px-4 py-2 text-base font-medium bg-white dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md">
+                  Sign in
                 </div>
               </Link>
-              <Link href="/editor">
-                <div className="px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer">
-                  Create Blog
+              <Link href="/auth?tab=register">
+                <div className="w-full text-center px-4 py-2 text-base font-medium bg-primary-500 text-white rounded-md">
+                  Sign up
                 </div>
               </Link>
-              <button className="text-left px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
-                Sign out
-              </button>
             </div>
-          </div>
+          )}
         </div>
       )}
     </header>
