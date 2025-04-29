@@ -24,9 +24,9 @@ const NavLink: React.FC<NavLinkProps> = ({ href, label, isActive }) => {
   
   return (
     <Link href={href}>
-      <a className={`${activeClass} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}>
+      <div className={`${activeClass} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-pointer`}>
         {label}
-      </a>
+      </div>
     </Link>
   );
 };
@@ -57,13 +57,13 @@ const Header: React.FC = () => {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/">
-                <a className="flex items-center">
+                <div className="flex items-center cursor-pointer">
                   <svg className="h-8 w-8 text-primary-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 16L6 10H18L12 16Z" fill="currentColor"/>
                     <path d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">BlogAI</span>
-                </a>
+                </div>
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -98,12 +98,12 @@ const Header: React.FC = () => {
             {/* User Profile */}
             <div className="ml-3 relative">
               <Link href={`/profile/${user.id}`}>
-                <a>
+                <div className="cursor-pointer">
                   <Avatar>
                     <AvatarImage src={user.avatar} alt={user.name} />
                     <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
                   </Avatar>
-                </a>
+                </div>
               </Link>
             </div>
           </div>
@@ -132,19 +132,19 @@ const Header: React.FC = () => {
         <div className="sm:hidden bg-white dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex flex-col space-y-2">
             <Link href="/">
-              <a className="px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <div className="px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
                 Home
-              </a>
+              </div>
             </Link>
             <Link href="/explore">
-              <a className="px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <div className="px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
                 Explore
-              </a>
+              </div>
             </Link>
             <Link href="/bookmarks">
-              <a className="px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <div className="px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
                 Bookmarks
-              </a>
+              </div>
             </Link>
           </div>
 
@@ -162,14 +162,14 @@ const Header: React.FC = () => {
             </div>
             <div className="mt-3 flex flex-col space-y-1">
               <Link href={`/profile/${user.id}`}>
-                <a className="px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
+                <div className="px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer">
                   Your Profile
-                </a>
+                </div>
               </Link>
               <Link href="/editor">
-                <a className="px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
+                <div className="px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer">
                   Create Blog
-                </a>
+                </div>
               </Link>
               <button className="text-left px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
                 Sign out
