@@ -202,8 +202,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      // Validate partial blog data
-      const blogData = insertBlogSchema.partial().parse(req.body);
+      // Validate blog data
+      const blogData = z.object({
+        title: z.string().optional(),
+        content: z.string().optional(),
+        summary: z.string().nullable().optional(),
+        featuredImage: z.string().nullable().optional(),
+        category: z.string().nullable().optional(),
+        isFeatured: z.boolean().optional(),
+        isPublished: z.boolean().optional(),
+        publishedAt: z.date().optional(),
+      }).parse(req.body);
       
       const updatedBlog = await storage.updateBlog(blogId, blogData);
       

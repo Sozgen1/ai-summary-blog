@@ -9,6 +9,12 @@ import {
 } from "@shared/schema";
 import { eq, desc, ilike, and, or } from "drizzle-orm";
 import { db } from "./db";
+import connectPgSimple from "connect-pg-simple";
+import session from "express-session";
+import { pool } from "./db";
+
+// Create a PostgreSQL session store
+const PostgresSessionStore = connectPgSimple(session);
 
 export interface IStorage {
   // User Operations
@@ -516,6 +522,65 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return !!deleted;
   }
+
+  // Bookmark Operations
+  async getBookmarkById(id: number): Promise<Bookmark | undefined> {
+    const [bookmark] = await db.select().from(bookmarks).where(eq(bookmarks.id, id));
+    return bookmark;
+  }
+
+  async getBookmark(userId: number, blogId: number): Promise<Bookmark | undefined> {
+    const [bookmark] = await db
+      .select()
+      .from(bookmarks)
+      .where(and(eq(bookmarks.userId, userId), eq(bookmarks.blogId, blogId)));
+    return bookmark;
+  }
+
+  async getUserBookmarks(userId: number): Promise<Blog[]> {
+    return await db
+      .select({
+        id: blogs.id,
+        title: blogs.title,
+        content: blogs.content,
+        summary: blogs.summary,
+        featuredImage: blogs.featuredImage,
+        category: blogs.category,
+        authorId: blogs.authorId,
+        isFeatured: blogs.isFeatured,
+        isPublished: blogs.isPublished,
+        publishedAt: blogs.publishedAt,
+        createdAt: blogs.createdAt,
+        updatedAt: blogs.updatedAt
+      })
+      .from(blogs)
+      .innerJoin(bookmarks, eq(blogs.id, bookmarks.blogId))
+      .where(eq(bookmarks.userId, userId))
+      .orderBy(desc(bookmarks.createdAt));
+  }
+
+  async createBookmark(bookmark: InsertBookmark): Promise<Bookmark> {
+    const [newBookmark] = await db
+      .insert(bookmarks)
+      .values(bookmark)
+      .returning();
+    return newBookmark;
+  }
+
+  async deleteBookmark(id: number): Promise<boolean> {
+    const [deleted] = await db
+      .delete(bookmarks)
+      .where(eq(bookmarks.id, id))
+      .returning();
+    return !!deleted;
+  }
+  
+  // Session Store property for authentication
+  sessionStore = new PostgresSessionStore({
+    pool, 
+    tableName: 'session',
+    createTableIfMissing: true
+  });
 }
 
 export const storage = new DatabaseStorage();
