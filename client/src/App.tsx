@@ -11,6 +11,8 @@ import Home from "@/pages/Home";
 import BlogDetail from "@/pages/BlogDetail";
 import BlogEditor from "@/pages/BlogEditor";
 import UserProfile from "@/pages/UserProfile";
+import Explore from "@/pages/Explore";
+import Bookmarks from "@/pages/Bookmarks";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -21,6 +23,8 @@ function Router() {
       <Route path="/editor" component={BlogEditor} />
       <Route path="/editor/:id" component={BlogEditor} />
       <Route path="/profile/:id" component={UserProfile} />
+      <Route path="/explore" component={Explore} />
+      <Route path="/bookmarks" component={Bookmarks} />
       <Route component={NotFound} />
     </Switch>
   );
