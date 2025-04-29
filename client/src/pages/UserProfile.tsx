@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/utils";
 import { Blog, User } from "@shared/schema";
+import { useAuth } from "@/hooks/use-auth";
+import ProfileEditForm from "@/components/ProfileEditForm";
 
 interface BlogWithStats extends Blog {
   stats: {
@@ -20,6 +22,8 @@ interface BlogWithStats extends Blog {
 const UserProfile: React.FC = () => {
   const [, params] = useRoute<{ id: string }>("/profile/:id");
   const [isCurrentUser, setIsCurrentUser] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const { user: currentUser } = useAuth();
   
   // User profile data
   const { data: user, isLoading: isUserLoading, error: userError } = useQuery<User>({
@@ -68,10 +72,10 @@ const UserProfile: React.FC = () => {
 
   // Check if this is the current user's profile
   useEffect(() => {
-    // In a real app, you would check this against auth context
-    // For this demo, we'll assume user ID 1 is the current user
-    setIsCurrentUser(params?.id === "1");
-  }, [params?.id]);
+    if (currentUser && params?.id) {
+      setIsCurrentUser(currentUser.id.toString() === params.id);
+    }
+  }, [currentUser, params?.id]);
 
   // Loading state
   if (isUserLoading) {
@@ -134,7 +138,7 @@ const UserProfile: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center">
             <div className="-mt-16 sm:-mt-24">
               <Avatar className="h-32 w-32 sm:h-40 sm:w-40 border-4 border-white dark:border-gray-800">
-                <AvatarImage src={user.profileImage} alt={user.name || user.username} />
+                <AvatarImage src={user.profileImage || undefined} alt={user.name || user.username} />
                 <AvatarFallback>{(user.name || user.username).substring(0, 2)}</AvatarFallback>
               </Avatar>
             </div>
@@ -156,11 +160,23 @@ const UserProfile: React.FC = () => {
             </div>
             {isCurrentUser && (
               <div className="mt-6 sm:mt-0 sm:ml-auto">
-                <Button className="flex items-center">
+                <Button 
+                  className="flex items-center"
+                  onClick={() => setShowEditForm(true)}
+                >
                   <Edit2 className="h-5 w-5 mr-1" />
                   Edit Profile
                 </Button>
               </div>
+            )}
+            
+            {/* Profile Edit Form Dialog */}
+            {isCurrentUser && user && showEditForm && (
+              <ProfileEditForm 
+                user={user}
+                isOpen={showEditForm}
+                onClose={() => setShowEditForm(false)}
+              />
             )}
           </div>
           
