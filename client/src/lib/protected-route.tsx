@@ -22,9 +22,11 @@ export function ProtectedRoute({
   }
 
   if (!user) {
+    // Encode the current path to redirect back after login
+    const encodedRedirect = encodeURIComponent(path);
     return (
       <Route path={path}>
-        <Redirect to="/auth" />
+        <Redirect to={`/auth/${encodedRedirect}`} />
       </Route>
     );
   }

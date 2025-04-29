@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { useLocation, useRoute } from "wouter";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
 
 import {
   Card,
@@ -50,7 +51,26 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<string>("login");
   const [, setLocation] = useLocation();
+  const [, params] = useRoute<{ redirectTo?: string }>("/auth/:redirectTo?");
   const { toast } = useToast();
+  const { user, isLoading } = useAuth();
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && !isLoading) {
+      // Redirect to the intended destination or home page
+      const destination = params?.redirectTo 
+        ? decodeURIComponent(params.redirectTo)
+        : "/";
+      
+      setLocation(destination);
+      
+      toast({
+        title: "Already logged in",
+        description: "You are already logged in"
+      });
+    }
+  }, [user, isLoading, params, setLocation, toast]);
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -82,12 +102,22 @@ export default function AuthPage() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (userData) => {
+      // Update the auth state
+      queryClient.setQueryData(["/api/user"], userData);
+      
+      // Get the redirect destination
+      const destination = params?.redirectTo 
+        ? decodeURIComponent(params.redirectTo)
+        : "/";
+      
       toast({
         title: "Success",
         description: "You have successfully logged in",
       });
-      setLocation("/");
+      
+      // Redirect to the intended destination
+      setLocation(destination);
     },
     onError: (error: any) => {
       toast({
@@ -108,13 +138,22 @@ export default function AuthPage() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (userData) => {
+      // Update the auth state with the registered user data
+      queryClient.setQueryData(["/api/user"], userData);
+      
+      // Get the redirect destination
+      const destination = params?.redirectTo 
+        ? decodeURIComponent(params.redirectTo)
+        : "/";
+      
       toast({
         title: "Success",
-        description: "Account created successfully. You can now log in.",
+        description: "Account created successfully. You are now logged in!",
       });
-      setActiveTab("login");
-      registerForm.reset();
+      
+      // Redirect to the intended destination
+      setLocation(destination);
     },
     onError: (error: any) => {
       toast({
