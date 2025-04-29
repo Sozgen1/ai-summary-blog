@@ -1,35 +1,63 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bookmark, Trash2 } from "lucide-react";
+import { Bookmark, Trash2, AlertCircle, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Blog } from "@shared/schema";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
 
 const Bookmarks: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const [, setLocation] = useLocation();
+  
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to access your bookmarks",
+        variant: "destructive",
+      });
+      setLocation("/auth");
+    }
+  }, [user, isAuthLoading, setLocation, toast]);
   
   // Get bookmarks from the API
-  const { data: bookmarks, isLoading } = useQuery<Blog[]>({
+  const { 
+    data: bookmarks, 
+    isLoading: isBookmarksLoading,
+    error: bookmarksError
+  } = useQuery<Blog[]>({
     queryKey: ['/api/bookmarks'],
     queryFn: async () => {
-      const response = await fetch('/api/bookmarks');
+      const response = await fetch('/api/bookmarks', {
+        credentials: 'include' // Important for authentication
+      });
       if (!response.ok) {
-        throw new Error('Failed to fetch bookmarks');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to fetch bookmarks');
       }
       return response.json();
-    }
+    },
+    enabled: !!user // Only fetch if user is authenticated
   });
   
   // Mutation to remove bookmark
   const removeBookmarkMutation = useMutation({
     mutationFn: async (bookmarkId: number) => {
-      await apiRequest('DELETE', `/api/bookmarks/${bookmarkId}`);
+      const response = await apiRequest('DELETE', `/api/bookmarks/${bookmarkId}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to remove bookmark');
+      }
+      return response;
     },
     onSuccess: () => {
       // Refetch bookmarks after successful deletion
@@ -52,6 +80,20 @@ const Bookmarks: React.FC = () => {
   const handleRemoveBookmark = (blogId: number) => {
     removeBookmarkMutation.mutate(blogId);
   };
+  
+  // Loading state while authentication is being checked
+  if (isAuthLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  // Redirect if not authenticated (handled by the useEffect above)
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -64,7 +106,22 @@ const Bookmarks: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-400">Access your saved articles quickly</p>
         </div>
         
-        {isLoading ? (
+        {bookmarksError ? (
+          <div className="text-center py-16 bg-red-50 dark:bg-red-900/20 rounded-lg">
+            <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+            <h3 className="mt-4 text-xl font-semibold text-red-600 dark:text-red-400">Error Loading Bookmarks</h3>
+            <p className="mt-2 text-red-500 dark:text-red-300">
+              {bookmarksError instanceof Error ? bookmarksError.message : "Failed to load bookmarks"}
+            </p>
+            <Button 
+              variant="outline" 
+              className="mt-6"
+              onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] })}
+            >
+              Try Again
+            </Button>
+          </div>
+        ) : isBookmarksLoading ? (
           <div className="space-y-6">
             {[...Array(3)].map((_, i) => (
               <Card key={i} className="overflow-hidden">
