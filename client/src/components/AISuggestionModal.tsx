@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,13 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({
   onSelectSuggestion
 }) => {
   const [selectedSuggestion, setSelectedSuggestion] = useState<string>("");
+  
+  // Reset selected suggestion when modal opens with new suggestions
+  useEffect(() => {
+    if (isOpen && !isLoading) {
+      setSelectedSuggestion("");
+    }
+  }, [isOpen, isLoading, suggestions]);
 
   const handleApply = () => {
     if (!selectedSuggestion) return;
@@ -82,30 +89,28 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({
           ) : (
             <>
               {type === "title" && Array.isArray(suggestions) ? (
-                <RadioGroup value={selectedSuggestion} onValueChange={setSelectedSuggestion}>
-                  <div className="space-y-2">
-                    {suggestions.map((suggestion, index) => (
-                      <div 
-                        key={index} 
-                        className={`flex items-center p-3 rounded-md border hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors ${
-                          selectedSuggestion === suggestion 
-                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 dark:border-primary-800' 
-                            : 'border-gray-200 dark:border-gray-700'
-                        }`}
-                        onClick={() => setSelectedSuggestion(suggestion)}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value={suggestion} id={`suggestion-${index}`} />
-                          <Label 
-                            htmlFor={`suggestion-${index}`} 
-                            className="font-normal text-gray-700 dark:text-gray-300 cursor-pointer"
-                          >
-                            {suggestion}
-                          </Label>
-                        </div>
+                <RadioGroup value={selectedSuggestion} onValueChange={setSelectedSuggestion} className="space-y-2">
+                  {suggestions.map((suggestion, index) => (
+                    <div 
+                      key={index} 
+                      className={`flex items-center p-3 rounded-md border hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors ${
+                        selectedSuggestion === suggestion 
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 dark:border-primary-800' 
+                          : 'border-gray-200 dark:border-gray-700'
+                      }`}
+                      onClick={() => setSelectedSuggestion(suggestion)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value={suggestion} id={`suggestion-${index}`} />
+                        <Label 
+                          htmlFor={`suggestion-${index}`} 
+                          className="font-normal text-gray-700 dark:text-gray-300 cursor-pointer"
+                        >
+                          {suggestion}
+                        </Label>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </RadioGroup>
               ) : (
                 <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-700">
@@ -126,14 +131,14 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({
           )}
         </div>
 
-        {type === "title" && (
-          <DialogFooter>
+        {type === "title" && !isLoading && (
+          <DialogFooter className="mt-6">
             <Button variant="outline" onClick={handleClose}>
               Cancel
             </Button>
             <Button 
               onClick={handleApply} 
-              disabled={isLoading || !selectedSuggestion}
+              disabled={!selectedSuggestion}
             >
               Apply Selected
             </Button>
