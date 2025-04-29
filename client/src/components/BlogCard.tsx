@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Heart, MessageSquare } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDate, truncateText, calculateReadingTime } from "@/lib/utils";
+import { formatDate, truncateText, calculateReadingTime, extractTextFromHtml } from "@/lib/utils";
 import { Blog } from "@shared/schema";
 
 interface BlogCardProps {
@@ -28,7 +28,9 @@ const BlogCard: React.FC<BlogCardProps> = ({
   const defaultImage = `https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80`;
   
   const featuredImage = blog.featuredImage || defaultImage;
-  const readingTime = calculateReadingTime(blog.content);
+  // Extract text from HTML for reading time calculation
+  const plainText = extractTextFromHtml(blog.content);
+  const readingTime = calculateReadingTime(plainText);
   
   if (variant === "featured") {
     return (
@@ -40,7 +42,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
               <span className="text-primary-500 text-sm font-semibold">{blog.category}</span>
               <h3 className="text-xl font-bold mt-2 mb-3">{blog.title}</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                {blog.summary ? truncateText(blog.summary, 120) : truncateText(blog.content, 120)}
+                {blog.summary ? truncateText(blog.summary, 120) : truncateText(extractTextFromHtml(blog.content), 120)}
               </p>
               <div className="flex items-center">
                 <Avatar className="h-8 w-8 mr-2">
@@ -80,7 +82,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
           <div className="block cursor-pointer">
             <h3 className="text-xl font-bold mb-3">{blog.title}</h3>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
-              {blog.summary ? truncateText(blog.summary, 150) : truncateText(blog.content, 150)}
+              {blog.summary ? truncateText(blog.summary, 150) : truncateText(extractTextFromHtml(blog.content), 150)}
             </p>
           </div>
         </Link>
