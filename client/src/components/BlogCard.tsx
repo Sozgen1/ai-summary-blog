@@ -34,7 +34,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition duration-200">
         <Link href={`/blog/${blog.id}`}>
-          <a className="block">
+          <div className="block cursor-pointer">
             <img src={featuredImage} alt={blog.title} className="w-full h-48 object-cover" />
             <div className="p-6">
               <span className="text-primary-500 text-sm font-semibold">{blog.category}</span>
@@ -55,7 +55,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
                 </div>
               </div>
             </div>
-          </a>
+          </div>
         </Link>
       </div>
     );
@@ -65,9 +65,9 @@ const BlogCard: React.FC<BlogCardProps> = ({
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition duration-200 flex flex-col md:flex-row">
       <Link href={`/blog/${blog.id}`}>
-        <a className="block md:w-64 h-48">
+        <div className="block md:w-64 h-48 cursor-pointer">
           <img src={featuredImage} alt={blog.title} className="w-full h-full object-cover" />
-        </a>
+        </div>
       </Link>
       <div className="p-6 flex-1">
         <div className="flex items-center justify-between mb-3">
@@ -77,23 +77,23 @@ const BlogCard: React.FC<BlogCardProps> = ({
           </span>
         </div>
         <Link href={`/blog/${blog.id}`}>
-          <a className="block">
+          <div className="block cursor-pointer">
             <h3 className="text-xl font-bold mb-3">{blog.title}</h3>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
               {blog.summary ? truncateText(blog.summary, 150) : truncateText(blog.content, 150)}
             </p>
-          </a>
+          </div>
         </Link>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <Link href={`/profile/${author.id}`}>
-              <a className="flex items-center">
+              <div className="flex items-center cursor-pointer">
                 <Avatar className="h-8 w-8 mr-2">
                   <AvatarImage src={author.image} alt={author.name} />
                   <AvatarFallback>{author.name.substring(0, 2)}</AvatarFallback>
                 </Avatar>
                 <p className="text-sm font-medium">{author.name}</p>
-              </a>
+              </div>
             </Link>
           </div>
           {stats && (
