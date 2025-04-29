@@ -126,6 +126,7 @@ const BlogEditor: React.FC = () => {
         throw new Error("Content is required");
       }
 
+      // Create a blog data object without the publishedAt field for now
       const blogData = {
         title,
         content,
@@ -136,7 +137,7 @@ const BlogEditor: React.FC = () => {
         authorId: 1, 
         isPublished: published,
         isFeatured: false, // Default value
-        publishedAt: published ? new Date().toISOString() : null
+        // We'll handle the date differently on the server
       };
 
       if (isEditMode) {

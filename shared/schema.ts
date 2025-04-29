@@ -102,17 +102,25 @@ export const insertUserSchema = createInsertSchema(users).pick({
   bio: true,
 });
 
-export const insertBlogSchema = createInsertSchema(blogs).pick({
-  title: true,
-  content: true,
-  summary: true,
-  featuredImage: true,
-  category: true,
-  authorId: true,
-  isFeatured: true,
-  isPublished: true,
-  publishedAt: true,
-});
+export const insertBlogSchema = createInsertSchema(blogs)
+  .pick({
+    title: true,
+    content: true,
+    summary: true,
+    featuredImage: true,
+    category: true,
+    authorId: true,
+    isFeatured: true,
+    isPublished: true,
+    publishedAt: true,
+  })
+  .transform((data) => {
+    // Handle the publishedAt field to properly format dates or null
+    return {
+      ...data,
+      publishedAt: data.isPublished ? new Date() : null
+    };
+  });
 
 export const insertCommentSchema = createInsertSchema(comments).pick({
   content: true,
