@@ -130,7 +130,7 @@ const BlogEditor: React.FC = () => {
         title,
         content,
         summary: summary.trim() || null,
-        category: category || null,
+        category: category === 'none' ? null : category,
         featuredImage: featuredImage || null,
         // In a real app, this would come from the auth context
         authorId: 1, 
@@ -402,7 +402,7 @@ const BlogEditor: React.FC = () => {
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Select a category</SelectItem>
+                <SelectItem value="none">Select a category</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.value} value={category.value}>{category.label}</SelectItem>
                 ))}

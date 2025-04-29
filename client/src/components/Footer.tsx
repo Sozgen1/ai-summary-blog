@@ -35,17 +35,17 @@ const Footer: React.FC = () => {
         </div>
         <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8 md:flex md:items-center md:justify-between">
           <div className="flex flex-wrap justify-center space-x-6 md:order-2">
-            <Link href="/about">
-              <a className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">About</a>
+            <Link href="/about" className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+              About
             </Link>
-            <Link href="/">
-              <a className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Blog</a>
+            <Link href="/" className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+              Blog
             </Link>
-            <Link href="/privacy">
-              <a className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Privacy Policy</a>
+            <Link href="/privacy" className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+              Privacy Policy
             </Link>
-            <Link href="/terms">
-              <a className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Terms of Service</a>
+            <Link href="/terms" className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+              Terms of Service
             </Link>
           </div>
           <p className="mt-8 text-sm text-gray-500 dark:text-gray-400 md:mt-0 md:order-1">
