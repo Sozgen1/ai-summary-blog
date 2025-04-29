@@ -348,20 +348,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { generateTitleSuggestions, generateSummarySuggestion } = await import('./openai');
       
       if (type === 'title') {
-        // Generate title suggestions using OpenAI
+        // Generate title suggestions using OpenAI (with fallback)
         const suggestions = await generateTitleSuggestions(content);
         res.json({ suggestions });
       } else {
-        // Generate summary suggestion using OpenAI
+        // Generate summary suggestion using OpenAI (with fallback)
         const suggestion = await generateSummarySuggestion(content);
         res.json({ suggestion });
       }
     } catch (error) {
       console.error("Error in AI suggestions endpoint:", error);
-      res.status(500).json({ 
-        error: true, 
-        message: error instanceof Error ? error.message : "Failed to generate AI suggestions" 
-      });
+      
+      // Return fallback data instead of an error
+      if (type === 'title') {
+        const { FALLBACK_TITLE_SUGGESTIONS } = await import('./openai');
+        res.json({ suggestions: FALLBACK_TITLE_SUGGESTIONS });
+      } else {
+        const { FALLBACK_SUMMARY } = await import('./openai');
+        res.json({ suggestion: FALLBACK_SUMMARY });
+      }
     }
   }));
 

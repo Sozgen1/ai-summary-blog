@@ -134,6 +134,8 @@ const BlogEditor: React.FC = () => {
         featuredImage: featuredImage || null,
         // In a real app, this would come from the auth context
         authorId: 1, 
+        isPublished: published,
+        isFeatured: false, // Default value
         publishedAt: published ? new Date().toISOString() : null
       };
 
