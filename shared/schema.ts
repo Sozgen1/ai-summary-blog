@@ -1,7 +1,9 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
+// Define all tables first
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -19,7 +21,9 @@ export const blogs = pgTable("blogs", {
   summary: text("summary"),
   featuredImage: text("featured_image"),
   category: text("category"),
-  authorId: integer("author_id").notNull(),
+  authorId: integer("author_id").notNull().references(() => users.id),
+  isFeatured: boolean("is_featured").default(false),
+  isPublished: boolean("is_published").default(true),
   publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at"),
@@ -28,21 +32,65 @@ export const blogs = pgTable("blogs", {
 export const comments = pgTable("comments", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
-  blogId: integer("blog_id").notNull(),
-  authorId: integer("author_id").notNull(),
+  blogId: integer("blog_id").notNull().references(() => blogs.id),
+  authorId: integer("author_id").notNull().references(() => users.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const tags = pgTable("tags", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
+  description: text("description"),
 });
 
 export const blogTags = pgTable("blog_tags", {
   id: serial("id").primaryKey(),
-  blogId: integer("blog_id").notNull(),
-  tagId: integer("tag_id").notNull(),
-});
+  blogId: integer("blog_id").notNull().references(() => blogs.id),
+  tagId: integer("tag_id").notNull().references(() => tags.id),
+}, (t) => ({
+  unique: unique().on(t.blogId, t.tagId),
+}));
+
+// Then define all relations
+export const usersRelations = relations(users, ({ many }) => ({
+  blogs: many(blogs),
+  comments: many(comments)
+}));
+
+export const blogsRelations = relations(blogs, ({ one, many }) => ({
+  author: one(users, {
+    fields: [blogs.authorId],
+    references: [users.id]
+  }),
+  comments: many(comments),
+  blogTags: many(blogTags)
+}));
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  blog: one(blogs, {
+    fields: [comments.blogId],
+    references: [blogs.id]
+  }),
+  author: one(users, {
+    fields: [comments.authorId],
+    references: [users.id]
+  })
+}));
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+  blogTags: many(blogTags)
+}));
+
+export const blogTagsRelations = relations(blogTags, ({ one }) => ({
+  blog: one(blogs, {
+    fields: [blogTags.blogId],
+    references: [blogs.id]
+  }),
+  tag: one(tags, {
+    fields: [blogTags.tagId],
+    references: [tags.id]
+  })
+}));
 
 // Schemas for insertion
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -61,6 +109,9 @@ export const insertBlogSchema = createInsertSchema(blogs).pick({
   featuredImage: true,
   category: true,
   authorId: true,
+  isFeatured: true,
+  isPublished: true,
+  publishedAt: true,
 });
 
 export const insertCommentSchema = createInsertSchema(comments).pick({
@@ -71,6 +122,7 @@ export const insertCommentSchema = createInsertSchema(comments).pick({
 
 export const insertTagSchema = createInsertSchema(tags).pick({
   name: true,
+  description: true,
 });
 
 export const insertBlogTagSchema = createInsertSchema(blogTags).pick({
