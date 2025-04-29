@@ -1,10 +1,11 @@
 import { 
-  users, blogs, comments, tags, blogTags,
+  users, blogs, comments, tags, blogTags, bookmarks,
   type User, type InsertUser,
   type Blog, type InsertBlog,
   type Comment, type InsertComment,
   type Tag, type InsertTag,
-  type BlogTag, type InsertBlogTag
+  type BlogTag, type InsertBlogTag,
+  type Bookmark, type InsertBookmark
 } from "@shared/schema";
 import { eq, desc, ilike, and, or } from "drizzle-orm";
 import { db } from "./db";
@@ -41,20 +42,33 @@ export interface IStorage {
   getBlogTags(blogId: number): Promise<Tag[]>;
   addTagToBlog(blogId: number, tagId: number): Promise<BlogTag>;
   removeTagFromBlog(blogId: number, tagId: number): Promise<boolean>;
+  
+  // Bookmark Operations
+  getBookmarkById(id: number): Promise<Bookmark | undefined>;
+  getBookmark(userId: number, blogId: number): Promise<Bookmark | undefined>;
+  getUserBookmarks(userId: number): Promise<Blog[]>;
+  createBookmark(bookmark: InsertBookmark): Promise<Bookmark>;
+  deleteBookmark(id: number): Promise<boolean>;
+  
+  // Session Store
+  sessionStore: any;
 }
 
 export class MemStorage implements IStorage {
+  sessionStore: any;
   private users: Map<number, User>;
   private blogs: Map<number, Blog>;
   private comments: Map<number, Comment>;
   private tags: Map<number, Tag>;
   private blogTags: Map<number, BlogTag>;
+  private bookmarks: Map<number, Bookmark>;
   
   private userIdCounter: number;
   private blogIdCounter: number;
   private commentIdCounter: number;
   private tagIdCounter: number;
   private blogTagIdCounter: number;
+  private bookmarkIdCounter: number;
 
   constructor() {
     this.users = new Map();
@@ -62,12 +76,17 @@ export class MemStorage implements IStorage {
     this.comments = new Map();
     this.tags = new Map();
     this.blogTags = new Map();
+    this.bookmarks = new Map();
     
     this.userIdCounter = 1;
     this.blogIdCounter = 1;
     this.commentIdCounter = 1;
     this.tagIdCounter = 1;
     this.blogTagIdCounter = 1;
+    this.bookmarkIdCounter = 1;
+
+    // Session store
+    this.sessionStore = {}; // Mock session store for memory implementation
     
     // Add some initial data for demo purposes
     this.initializeData();
@@ -277,6 +296,43 @@ export class MemStorage implements IStorage {
     
     if (!blogTagToRemove) return false;
     return this.blogTags.delete(blogTagToRemove.id);
+  }
+
+  // Bookmark Operations
+  async getBookmarkById(id: number): Promise<Bookmark | undefined> {
+    return this.bookmarks.get(id);
+  }
+
+  async getBookmark(userId: number, blogId: number): Promise<Bookmark | undefined> {
+    return Array.from(this.bookmarks.values())
+      .find(bookmark => bookmark.userId === userId && bookmark.blogId === blogId);
+  }
+
+  async getUserBookmarks(userId: number): Promise<Blog[]> {
+    const userBookmarks = Array.from(this.bookmarks.values())
+      .filter(bookmark => bookmark.userId === userId);
+    
+    const blogIds = userBookmarks.map(bookmark => bookmark.blogId);
+    return Array.from(this.blogs.values())
+      .filter(blog => blogIds.includes(blog.id));
+  }
+
+  async createBookmark(bookmark: InsertBookmark): Promise<Bookmark> {
+    const id = this.bookmarkIdCounter++;
+    const timestamp = new Date();
+    
+    const newBookmark: Bookmark = {
+      ...bookmark,
+      id,
+      createdAt: timestamp
+    };
+    
+    this.bookmarks.set(id, newBookmark);
+    return newBookmark;
+  }
+
+  async deleteBookmark(id: number): Promise<boolean> {
+    return this.bookmarks.delete(id);
   }
 }
 

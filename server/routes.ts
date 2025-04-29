@@ -341,6 +341,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     res.status(204).end();
   }));
+  
+  // Bookmark routes
+  app.get(`${apiPrefix}/bookmarks`, isAuthenticated, asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: true, message: "Authentication required" });
+    }
+    
+    try {
+      const bookmarks = await storage.getUserBookmarks(userId);
+      res.json(bookmarks);
+    } catch (error) {
+      console.error("Error fetching bookmarks:", error);
+      res.status(500).json({ error: true, message: "Error fetching bookmarks" });
+    }
+  }));
+  
+  app.post(`${apiPrefix}/bookmarks`, isAuthenticated, asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    const { blogId } = req.body;
+    
+    if (!userId) {
+      return res.status(401).json({ error: true, message: "Authentication required" });
+    }
+    
+    if (!blogId) {
+      return res.status(400).json({ error: true, message: "Blog ID is required" });
+    }
+    
+    try {
+      // Check if blog exists
+      const blog = await storage.getBlog(blogId);
+      if (!blog) {
+        return res.status(404).json({ error: true, message: "Blog not found" });
+      }
+      
+      // Check if bookmark already exists
+      const existingBookmark = await storage.getBookmark(userId, blogId);
+      if (existingBookmark) {
+        return res.status(400).json({ error: true, message: "Blog already bookmarked" });
+      }
+      
+      const bookmark = await storage.createBookmark({
+        userId,
+        blogId,
+      });
+      
+      res.status(201).json(bookmark);
+    } catch (error) {
+      console.error("Error creating bookmark:", error);
+      res.status(500).json({ error: true, message: "Error creating bookmark" });
+    }
+  }));
+  
+  app.delete(`${apiPrefix}/bookmarks/:id`, isAuthenticated, asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    const bookmarkId = parseInt(req.params.id);
+    
+    if (!userId) {
+      return res.status(401).json({ error: true, message: "Authentication required" });
+    }
+    
+    if (isNaN(bookmarkId)) {
+      return res.status(400).json({ error: true, message: "Invalid bookmark ID" });
+    }
+    
+    try {
+      // Check if bookmark exists and belongs to user
+      const bookmark = await storage.getBookmarkById(bookmarkId);
+      if (!bookmark) {
+        return res.status(404).json({ error: true, message: "Bookmark not found" });
+      }
+      
+      if (bookmark.userId !== userId) {
+        return res.status(403).json({ error: true, message: "Not authorized to delete this bookmark" });
+      }
+      
+      const success = await storage.deleteBookmark(bookmarkId);
+      if (!success) {
+        return res.status(404).json({ error: true, message: "Bookmark not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting bookmark:", error);
+      res.status(500).json({ error: true, message: "Error deleting bookmark" });
+    }
+  }));
 
   // AI suggestion endpoint
   app.post(`${apiPrefix}/ai/suggestions`, asyncHandler(async (req: Request, res: Response) => {
