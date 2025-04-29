@@ -4,6 +4,8 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/hooks/useDarkMode";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/lib/protected-route";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -14,17 +16,19 @@ import UserProfile from "@/pages/UserProfile";
 import Explore from "@/pages/Explore";
 import Bookmarks from "@/pages/Bookmarks";
 import NotFound from "@/pages/not-found";
+import AuthPage from "@/pages/auth-page";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/blog/:id" component={BlogDetail} />
-      <Route path="/editor" component={BlogEditor} />
-      <Route path="/editor/:id" component={BlogEditor} />
-      <Route path="/profile/:id" component={UserProfile} />
+      <Route path="/auth" component={AuthPage} />
+      <ProtectedRoute path="/editor" component={BlogEditor} />
+      <ProtectedRoute path="/editor/:id" component={BlogEditor} />
+      <ProtectedRoute path="/profile/:id" component={UserProfile} />
+      <ProtectedRoute path="/bookmarks" component={Bookmarks} />
       <Route path="/explore" component={Explore} />
-      <Route path="/bookmarks" component={Bookmarks} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -33,18 +37,20 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <TooltipProvider>
-          <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition duration-200">
-            <Header />
-            <main className="flex-grow pt-16">
-              <Router />
-            </main>
-            <Footer />
-          </div>
-          <Toaster />
-        </TooltipProvider>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <TooltipProvider>
+            <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition duration-200">
+              <Header />
+              <main className="flex-grow pt-16">
+                <Router />
+              </main>
+              <Footer />
+            </div>
+            <Toaster />
+          </TooltipProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
