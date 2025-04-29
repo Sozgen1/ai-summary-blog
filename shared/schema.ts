@@ -14,6 +14,15 @@ export const users = pgTable("users", {
   bio: text("bio"),
 });
 
+export const bookmarks = pgTable("bookmarks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  blogId: integer("blog_id").notNull().references(() => blogs.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  unique: unique().on(t.userId, t.blogId),
+}));
+
 export const blogs = pgTable("blogs", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -54,7 +63,19 @@ export const blogTags = pgTable("blog_tags", {
 // Then define all relations
 export const usersRelations = relations(users, ({ many }) => ({
   blogs: many(blogs),
-  comments: many(comments)
+  comments: many(comments),
+  bookmarks: many(bookmarks)
+}));
+
+export const bookmarksRelations = relations(bookmarks, ({ one }) => ({
+  user: one(users, {
+    fields: [bookmarks.userId],
+    references: [users.id]
+  }),
+  blog: one(blogs, {
+    fields: [bookmarks.blogId],
+    references: [blogs.id]
+  })
 }));
 
 export const blogsRelations = relations(blogs, ({ one, many }) => ({
@@ -63,7 +84,8 @@ export const blogsRelations = relations(blogs, ({ one, many }) => ({
     references: [users.id]
   }),
   comments: many(comments),
-  blogTags: many(blogTags)
+  blogTags: many(blogTags),
+  bookmarks: many(bookmarks)
 }));
 
 export const commentsRelations = relations(comments, ({ one }) => ({
@@ -138,6 +160,11 @@ export const insertBlogTagSchema = createInsertSchema(blogTags).pick({
   tagId: true,
 });
 
+export const insertBookmarkSchema = createInsertSchema(bookmarks).pick({
+  userId: true,
+  blogId: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -153,3 +180,6 @@ export type InsertTag = z.infer<typeof insertTagSchema>;
 
 export type BlogTag = typeof blogTags.$inferSelect;
 export type InsertBlogTag = z.infer<typeof insertBlogTagSchema>;
+
+export type Bookmark = typeof bookmarks.$inferSelect;
+export type InsertBookmark = z.infer<typeof insertBookmarkSchema>;

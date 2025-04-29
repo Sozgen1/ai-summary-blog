@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bookmark, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,26 +7,50 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Blog } from "@shared/schema";
 import { Link } from "wouter";
 import { formatDate } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 const Bookmarks: React.FC = () => {
-  // Mock bookmark data - in a real app, this would come from an API endpoint
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // Get bookmarks from the API
   const { data: bookmarks, isLoading } = useQuery<Blog[]>({
-    queryKey: ['/api/blogs'], // In a real app, this would be '/api/bookmarks'
+    queryKey: ['/api/bookmarks'],
     queryFn: async () => {
-      const response = await fetch('/api/blogs');
+      const response = await fetch('/api/bookmarks');
       if (!response.ok) {
-        throw new Error('Failed to fetch blogs');
+        throw new Error('Failed to fetch bookmarks');
       }
-      // This is just demo data - in a real app, you would have a proper bookmarks endpoint
-      const blogs = await response.json();
-      return blogs.slice(0, 3); // Just returning first 3 blogs for demonstration
+      return response.json();
     }
   });
   
-  // Function to remove a bookmark (would interact with API in a real app)
+  // Mutation to remove bookmark
+  const removeBookmarkMutation = useMutation({
+    mutationFn: async (bookmarkId: number) => {
+      await apiRequest('DELETE', `/api/bookmarks/${bookmarkId}`);
+    },
+    onSuccess: () => {
+      // Refetch bookmarks after successful deletion
+      queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
+      toast({
+        title: "Bookmark removed",
+        description: "The article has been removed from your bookmarks",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error removing bookmark",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Function to remove a bookmark
   const handleRemoveBookmark = (blogId: number) => {
-    console.log("Removing bookmark:", blogId);
-    // In a real app, you would call an API to remove the bookmark
+    removeBookmarkMutation.mutate(blogId);
   };
 
   return (
