@@ -331,7 +331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(204).end();
   }));
 
-  // AI suggestion endpoint (placeholder)
+  // AI suggestion endpoint
   app.post(`${apiPrefix}/ai/suggestions`, asyncHandler(async (req: Request, res: Response) => {
     const { content, type } = req.body;
     
@@ -342,26 +342,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (type !== 'title' && type !== 'summary') {
       return res.status(400).json({ error: true, message: "Type must be 'title' or 'summary'" });
     }
-    
-    // In a real app, this would call the AI API with the content
-    // For this demo, we'll return mock suggestions
-    
-    if (type === 'title') {
-      // Return 5 title suggestions
-      res.json({
-        suggestions: [
-          "The Future of AI in Content Creation: Opportunities and Challenges",
-          "How AI is Revolutionizing the Way We Create and Consume Content",
-          "AI-Powered Writing: The New Frontier in Digital Content",
-          "Artificial Intelligence and Content Creation: A Game-Changing Partnership",
-          "Beyond Automation: How AI is Enhancing Human Creativity in Writing"
-        ]
-      });
-    } else {
-      // Return a summary suggestion
-      const summary = "Artificial intelligence is rapidly transforming how we create and consume written content in the digital age. From automated journalism to AI-powered writing assistants, the landscape of content creation is evolving at an unprecedented pace.";
-      res.json({
-        suggestion: summary
+
+    try {
+      // Import the OpenAI service methods
+      const { generateTitleSuggestions, generateSummarySuggestion } = await import('./openai');
+      
+      if (type === 'title') {
+        // Generate title suggestions using OpenAI
+        const suggestions = await generateTitleSuggestions(content);
+        res.json({ suggestions });
+      } else {
+        // Generate summary suggestion using OpenAI
+        const suggestion = await generateSummarySuggestion(content);
+        res.json({ suggestion });
+      }
+    } catch (error) {
+      console.error("Error in AI suggestions endpoint:", error);
+      res.status(500).json({ 
+        error: true, 
+        message: error instanceof Error ? error.message : "Failed to generate AI suggestions" 
       });
     }
   }));
