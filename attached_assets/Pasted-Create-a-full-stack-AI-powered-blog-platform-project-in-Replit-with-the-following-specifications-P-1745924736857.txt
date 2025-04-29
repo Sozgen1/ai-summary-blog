@@ -1,0 +1,130 @@
+Create a full-stack AI-powered blog platform project in Replit with the following specifications:
+Project Overview:
+A blog platform where users can create, edit, and view blog posts.
+
+Integrates AI to suggest blog titles and summaries based on content.
+
+Uses Next.js for frontend with Server-Side Rendering (SSR) for SEO and performance.
+
+Includes a backend with Node.js/Express.js, MongoDB for the database, and a secure authentication system.
+
+Designed to look like a production-ready real-world application with scalability in mind.
+Technology Stack:
+Frontend: Next.js (React), Tailwind CSS for styling, React-Quill for rich text editing.
+
+Backend: Node.js, Express.js for RESTful API.
+
+Database: MongoDB (using MongoDB Atlas for cloud hosting).
+
+Authentication: NextAuth.js with JWT and OAuth (Google login support).
+
+AI Integration: Placeholder for AI API (e.g., Grok API or OpenAI API) to generate blog titles and summaries.
+
+Other Tools: ESLint, Prettier for code quality, Vercel for deployment (optional).
+Project Structure:
+Initialize a Next.js project with TypeScript support.
+
+Create a separate folder for the backend (/backend) with Node.js and Express.js.
+
+Set up MongoDB connection using Mongoose.
+
+Configure Tailwind CSS for styling.
+
+Add React-Quill for the blog editor.
+
+Set up NextAuth.js for authentication.
+
+Include a .env file for environment variables (MongoDB URI, NextAuth secrets, AI API keys).
+Key Features:
+Frontend:
+Homepage with a list of blogs, search bar, and featured posts.
+
+Blog detail page with SSR for SEO (dynamic meta tags, Open Graph support).
+
+Blog creation/editing page with a rich text editor and AI suggestion buttons (for titles and summaries).
+
+User profile page showing authored blogs.
+Backend:
+REST API endpoints:
+/api/blogs: CRUD operations for blogs (create, read, update, delete).
+
+/api/users: User registration, login, and profile management.
+
+/api/ai/suggestions: Placeholder for AI-generated title and summary suggestions.
+Secure API with input validation and rate limiting.
+Database:
+MongoDB schemas for:
+Users: Email, password hash, profile info.
+
+Blogs: Title, content, summary, author, publication date.
+Indexes for performance (e.g., on blog title and author).
+Authentication:
+NextAuth.js with Google OAuth and email/password login.
+
+JWT-based session management.
+AI Integration:
+Placeholder API call to generate 5 title suggestions and a 100-word summary based on blog content.
+
+Display AI suggestions in the editor (e.g., in a modal or inline).
+SEO & Performance:
+Use Next.js SSR/SSG for blog pages.
+
+Optimize images with Next.js Image component.
+
+Add dynamic meta tags and sitemap.
+Replit Setup:
+Create a Node.js Replit project.
+
+Install dependencies: next, react, react-dom, tailwindcss, react-quill, express, mongoose, next-auth, dotenv, eslint, prettier.
+
+Configure Replit’s run command to start both Next.js (npm run dev) and the Express backend (node backend/index.js).
+
+Set up a .replit file to handle concurrent frontend and backend processes.
+
+Add environment variables in Replit’s Secrets for:
+MongoDB Atlas URI.
+
+NextAuth secret and Google OAuth credentials.
+
+Placeholder AI API key.
+Initialize a Git repository for version control.
+Sample Code:
+Create a basic Next.js page (pages/index.js) with a blog list.
+
+Set up a blog detail page (pages/blogs/[slug].js) with SSR.
+
+Create an editor page (pages/editor.js) with React-Quill and an AI suggestion button.
+
+Implement a basic Express.js server in /backend/index.js with:
+MongoDB connection.
+
+Blog and user API endpoints.
+
+Placeholder AI suggestion endpoint.
+Configure NextAuth.js in pages/api/auth/[...nextauth].js.
+Scalability Considerations:
+Structure the code to allow future additions like:
+Comment system.
+
+Like/share buttons.
+
+Blog categories and tags.
+Use modular code (e.g., separate API routes, reusable components).
+Deliverables:
+A working Replit project with frontend, backend, and database connected.
+
+Instructions in README.md for running the project and testing AI features.
+
+Placeholder comments for AI API integration (since actual API keys may not be available).
+
+Basic UI styled with Tailwind CSS.
+Additional Notes:
+Ensure the project is responsive and mobile-friendly.
+
+Add error handling for API calls and user inputs.
+
+Include a loading state for AI suggestions.
+
+Test the auth system with Google login and JWT.
+Please set up the project in Replit with the above requirements, including all necessary files, dependencies, and configurations. Provide a link to the Replit project or instructions to run it locally.
+
