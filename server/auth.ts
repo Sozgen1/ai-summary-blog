@@ -11,7 +11,16 @@ import { pool } from "./db";
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    // Define the User interface that Express will use
+    interface User {
+      id: number;
+      username: string;
+      password: string;
+      email: string;
+      name: string | null;
+      profileImage: string | null;
+      bio: string | null;
+    }
   }
 }
 

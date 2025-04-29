@@ -8,10 +8,21 @@ import {
   insertCommentSchema,
   insertTagSchema
 } from "@shared/schema";
+import { setupAuth } from "./auth";
+import cors from "cors";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API prefix
   const apiPrefix = "/api";
+  
+  // Setup CORS
+  app.use(cors({
+    origin: true,
+    credentials: true,
+  }));
+  
+  // Setup authentication
+  const isAuthenticated = setupAuth(app);
 
   // Middleware to handle async errors
   const asyncHandler = (fn: Function) => (req: Request, res: Response) => {
