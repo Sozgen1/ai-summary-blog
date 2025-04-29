@@ -6,6 +6,8 @@ import {
   type Tag, type InsertTag,
   type BlogTag, type InsertBlogTag
 } from "@shared/schema";
+import { eq, desc, ilike, and, or } from "drizzle-orm";
+import { db } from "./db";
 
 export interface IStorage {
   // User Operations
@@ -100,7 +102,13 @@ export class MemStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
     const timestamp = new Date();
-    const newUser: User = { ...user, id };
+    const newUser: User = { 
+      ...user, 
+      id,
+      name: user.name || null,
+      profileImage: user.profileImage || null,
+      bio: user.bio || null
+    };
     this.users.set(id, newUser);
     return newUser;
   }
@@ -165,8 +173,15 @@ export class MemStorage implements IStorage {
     const timestamp = new Date();
     
     const newBlog: Blog = {
-      ...blog,
       id,
+      title: blog.title,
+      content: blog.content,
+      authorId: blog.authorId,
+      summary: blog.summary || null,
+      featuredImage: blog.featuredImage || null,
+      category: blog.category || null,
+      isFeatured: blog.isFeatured ?? false,
+      isPublished: blog.isPublished ?? true,
       createdAt: timestamp,
       updatedAt: timestamp,
       publishedAt: blog.publishedAt || timestamp
@@ -230,7 +245,11 @@ export class MemStorage implements IStorage {
 
   async createTag(tag: InsertTag): Promise<Tag> {
     const id = this.tagIdCounter++;
-    const newTag: Tag = { ...tag, id };
+    const newTag: Tag = { 
+      ...tag, 
+      id,
+      description: tag.description || null
+    };
     this.tags.set(id, newTag);
     return newTag;
   }
@@ -261,4 +280,186 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // User Operations
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const [newUser] = await db.insert(users).values(user).returning();
+    return newUser;
+  }
+
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set(userData)
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
+  }
+
+  // Blog Operations
+  async getBlog(id: number): Promise<Blog | undefined> {
+    const [blog] = await db.select().from(blogs).where(eq(blogs.id, id));
+    return blog;
+  }
+
+  async getBlogs(limit = 10, offset = 0): Promise<Blog[]> {
+    return await db
+      .select()
+      .from(blogs)
+      .orderBy(desc(blogs.publishedAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getBlogsByAuthor(authorId: number): Promise<Blog[]> {
+    return await db
+      .select()
+      .from(blogs)
+      .where(eq(blogs.authorId, authorId))
+      .orderBy(desc(blogs.publishedAt));
+  }
+
+  async searchBlogs(query: string): Promise<Blog[]> {
+    return await db
+      .select()
+      .from(blogs)
+      .where(
+        or(
+          ilike(blogs.title, `%${query}%`),
+          ilike(blogs.content, `%${query}%`),
+          ilike(blogs.summary, `%${query}%`)
+        )
+      )
+      .orderBy(desc(blogs.publishedAt));
+  }
+
+  async getFeaturedBlogs(limit = 3): Promise<Blog[]> {
+    return await db
+      .select()
+      .from(blogs)
+      .where(eq(blogs.isFeatured, true))
+      .orderBy(desc(blogs.publishedAt))
+      .limit(limit);
+  }
+
+  async createBlog(blog: InsertBlog): Promise<Blog> {
+    const [newBlog] = await db
+      .insert(blogs)
+      .values({
+        ...blog,
+        publishedAt: blog.publishedAt || new Date(),
+      })
+      .returning();
+    return newBlog;
+  }
+
+  async updateBlog(id: number, blogData: Partial<InsertBlog>): Promise<Blog | undefined> {
+    const [updatedBlog] = await db
+      .update(blogs)
+      .set({
+        ...blogData,
+        updatedAt: new Date(),
+      })
+      .where(eq(blogs.id, id))
+      .returning();
+    return updatedBlog;
+  }
+
+  async deleteBlog(id: number): Promise<boolean> {
+    const [deleted] = await db
+      .delete(blogs)
+      .where(eq(blogs.id, id))
+      .returning();
+    return !!deleted;
+  }
+
+  // Comment Operations
+  async getCommentsByBlog(blogId: number): Promise<Comment[]> {
+    return await db
+      .select()
+      .from(comments)
+      .where(eq(comments.blogId, blogId))
+      .orderBy(desc(comments.createdAt));
+  }
+
+  async createComment(comment: InsertComment): Promise<Comment> {
+    const [newComment] = await db
+      .insert(comments)
+      .values(comment)
+      .returning();
+    return newComment;
+  }
+
+  async deleteComment(id: number): Promise<boolean> {
+    const [deleted] = await db
+      .delete(comments)
+      .where(eq(comments.id, id))
+      .returning();
+    return !!deleted;
+  }
+
+  // Tag Operations
+  async getTag(id: number): Promise<Tag | undefined> {
+    const [tag] = await db.select().from(tags).where(eq(tags.id, id));
+    return tag;
+  }
+
+  async getTagByName(name: string): Promise<Tag | undefined> {
+    const [tag] = await db
+      .select()
+      .from(tags)
+      .where(eq(tags.name, name));
+    return tag;
+  }
+
+  async createTag(tag: InsertTag): Promise<Tag> {
+    const [newTag] = await db.insert(tags).values(tag).returning();
+    return newTag;
+  }
+
+  // BlogTag Operations
+  async getBlogTags(blogId: number): Promise<Tag[]> {
+    return await db
+      .select({
+        id: tags.id,
+        name: tags.name,
+        description: tags.description,
+      })
+      .from(tags)
+      .innerJoin(blogTags, eq(tags.id, blogTags.tagId))
+      .where(eq(blogTags.blogId, blogId));
+  }
+
+  async addTagToBlog(blogId: number, tagId: number): Promise<BlogTag> {
+    const [newBlogTag] = await db
+      .insert(blogTags)
+      .values({ blogId, tagId })
+      .returning();
+    return newBlogTag;
+  }
+
+  async removeTagFromBlog(blogId: number, tagId: number): Promise<boolean> {
+    const [deleted] = await db
+      .delete(blogTags)
+      .where(and(eq(blogTags.blogId, blogId), eq(blogTags.tagId, tagId)))
+      .returning();
+    return !!deleted;
+  }
+}
+
+export const storage = new DatabaseStorage();
