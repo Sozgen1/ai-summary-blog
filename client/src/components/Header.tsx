@@ -128,7 +128,7 @@ const Header: React.FC = () => {
             ) : (
               <>
                 {/* Create Blog Button (redirects to auth) */}
-                <Link href="/auth/editor">
+                <Link href="/auth?redirect=%2Feditor">
                   <Button variant="ghost" size="sm" className="mr-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                     <PenSquare className="h-5 w-5 mr-1" />
                     <span>Create</span>
@@ -230,7 +230,7 @@ const Header: React.FC = () => {
             </div>
           ) : (
             <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700 flex flex-col space-y-3">
-              <Link href="/auth/editor">
+              <Link href="/auth?redirect=%2Feditor">
                 <div className="flex items-center px-4 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer">
                   <PenSquare className="h-5 w-5 mr-2" />
                   Create Blog

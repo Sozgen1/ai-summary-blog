@@ -26,7 +26,7 @@ export function ProtectedRoute({
     const encodedRedirect = encodeURIComponent(path);
     return (
       <Route path={path}>
-        <Redirect to={`/auth/${encodedRedirect}`} />
+        <Redirect to={`/auth?redirect=${encodedRedirect}`} />
       </Route>
     );
   }

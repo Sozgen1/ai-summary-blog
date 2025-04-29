@@ -50,17 +50,28 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<string>("login");
-  const [, setLocation] = useLocation();
-  const [, params] = useRoute<{ redirectTo?: string }>("/auth/:redirectTo?");
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const { user, isLoading } = useAuth();
+  
+  // Extract 'redirect' and 'tab' from the URL query parameters
+  const searchParams = new URLSearchParams(location.split('?')[1] || '');
+  const redirectTo = searchParams.get('redirect') || null;
+  const tabParam = searchParams.get('tab') || null;
+  
+  // Set the active tab based on the URL parameter
+  useEffect(() => {
+    if (tabParam === 'register') {
+      setActiveTab('register');
+    }
+  }, [tabParam]);
   
   // Redirect if already logged in
   useEffect(() => {
     if (user && !isLoading) {
       // Redirect to the intended destination or home page
-      const destination = params?.redirectTo 
-        ? decodeURIComponent(params.redirectTo)
+      const destination = redirectTo 
+        ? decodeURIComponent(redirectTo)
         : "/";
       
       setLocation(destination);
@@ -70,7 +81,7 @@ export default function AuthPage() {
         description: "You are already logged in"
       });
     }
-  }, [user, isLoading, params, setLocation, toast]);
+  }, [user, isLoading, redirectTo, setLocation, toast]);
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -107,8 +118,8 @@ export default function AuthPage() {
       queryClient.setQueryData(["/api/user"], userData);
       
       // Get the redirect destination
-      const destination = params?.redirectTo 
-        ? decodeURIComponent(params.redirectTo)
+      const destination = redirectTo 
+        ? decodeURIComponent(redirectTo)
         : "/";
       
       toast({
@@ -143,8 +154,8 @@ export default function AuthPage() {
       queryClient.setQueryData(["/api/user"], userData);
       
       // Get the redirect destination
-      const destination = params?.redirectTo 
-        ? decodeURIComponent(params.redirectTo)
+      const destination = redirectTo 
+        ? decodeURIComponent(redirectTo)
         : "/";
       
       toast({
