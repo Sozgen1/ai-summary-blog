@@ -129,11 +129,6 @@ Make sure to update API endpoints in your frontend (e.g. `/api/posts`) if needed
 * Backend → Render / Railway / Heroku
 * MongoDB → MongoDB Atlas
 
-## 🧑‍💻 Author
-
-**Your Name**
-[GitHub](https://github.com/yourusername) | [LinkedIn](https://linkedin.com/in/yourprofile)
-
 ## 📄 License
 
 This project is licensed under the MIT License.
