@@ -1,7 +1,7 @@
 
 # 🧠 AI-Powered Blog App
 
-A full-stack blog application that automatically summarizes user-submitted content using OpenAI and stores both the original and summarized content in MongoDB. Built with modern technologies for an intelligent and efficient blogging experience...
+A full-stack blog application that automatically summarizes user-submitted content using OpenAI and stores both the original and summarized content in MongoDB. Built with modern technologies for an intelligent and efficient blogging experience
 
 ## 🚀 Features
 
