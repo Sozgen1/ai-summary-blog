@@ -5,13 +5,13 @@ A full-stack blog application that automatically summarizes user-submitted conte
 
 ## 🚀 Features
 
-* 📝 User-submitted blog content
-* 🤖 Automatic content summarization with OpenAI API
-* 💾 MongoDB storage for both original and summarized versions
-* 🧭 RESTful API with CRUD operations
-* 🌐 Fully responsive frontend (React)
-* 🔐 User authentication (optional: JWT / OAuth)
-* 📈 Dashboard for viewing and managing posts
+* 📝 User-submitted blog content.
+* 🤖 Automatic content summarization with OpenAI API.
+* 💾 MongoDB storage for both original and summarized versions.
+* 🧭 RESTful API with CRUD operations.
+* 🌐 Fully responsive frontend (React).
+* 🔐 User authentication (optional: JWT / OAuth).
+* 📈 Dashboard for viewing and managing posts.
 
 ## 🛠️ Tech Stack
 
