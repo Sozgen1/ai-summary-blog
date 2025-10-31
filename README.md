@@ -7,7 +7,7 @@ A full-stack blog application that automatically summarizes user-submitted conte
 
 * 📝 User-submitted blog content.
 * 🤖 Automatic content summarization with OpenAI API.
-* 💾 MongoDB storage for both original and summarized versions.
+* 💾 MongoDB storage for both original and summarized versions...
 * 🧭 RESTful API with CRUD operations.
 * 🌐 Fully responsive frontend (React).
 * 🔐 User authentication (optional: JWT / OAuth).
