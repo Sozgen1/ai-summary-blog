@@ -131,6 +131,6 @@ Make sure to update API endpoints in your frontend (e.g. `/api/posts`) if needed
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License...
 
 
